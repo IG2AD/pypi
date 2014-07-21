@@ -1,9 +1,26 @@
-from distutils.core import setup
-import os
-# Utility function to read the README file.
-# Used for the long_description.  It's nice, because now 1) we have a top level
-# README file and 2) it's easier to type in the README file than to put a raw
-# string in below ...
+from setuptools.command.test import test as TestCommand
+from setuptools import setup
+import sys
+
+
+class Tox(TestCommand):
+    user_options = [('tox-args=', 'a', "Arguments to pass to tox")]
+
+    def initialize_options(self):
+        TestCommand.initialize_options(self)
+        self.tox_args = None
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        # import here, cause outside the eggs aren't loaded
+        import tox
+        import shlex
+        errno = tox.cmdline(args=shlex.split(self.tox_args))
+        sys.exit(errno)
 
 setup(
     name='example_pypi_project',
@@ -11,8 +28,10 @@ setup(
     author="Daniel Shirley",
     author_email="aditaa05@gmail.com",
     description=("An test of how to create, document, and publish "
-                 "to the cheese shop"),
+                 "to the cheese shop a5 pypi.org."),
     license="GPL v2",
     keywords="example documentation tutorial",
     packages=['an_example_pypi_project', 'tests'],
-)
+    tests_require=['tox'],
+    cmdclass={'test': Tox},
+    )
