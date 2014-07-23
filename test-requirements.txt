@@ -1,4 +1,3 @@
-unittest
 nose
 flake8
 pep8
